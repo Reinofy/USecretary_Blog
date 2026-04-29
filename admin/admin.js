@@ -23,27 +23,49 @@ async function checkSession() {
     }
 }
 
-// Fazer Login
-loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-    const errorMsg = document.getElementById('login-error');
-    
-    errorMsg.style.display = 'none';
-    
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-    });
+// Verifica carregamento do Supabase
+if (!window.supabase) {
+    alert("ERRO CRÍTICO: O Supabase (banco de dados) não carregou. Verifique se o seu navegador ou antivírus não está bloqueando conexões (AdBlock).");
+}
 
-    if (error) {
-        errorMsg.textContent = 'Erro ao fazer login: ' + error.message;
+// Fazer Login
+window.fazerLogin = async function() {
+    const emailInput = document.getElementById('login-email');
+    const passwordInput = document.getElementById('login-password');
+    const errorMsg = document.getElementById('login-error');
+    const btn = document.querySelector('#login-form button');
+    
+    // Validação básica
+    if (!emailInput.value || !passwordInput.value) {
+        errorMsg.textContent = 'Por favor, preencha o e-mail e a senha.';
         errorMsg.style.display = 'block';
-    } else {
-        showDashboard();
+        return;
     }
-});
+
+    errorMsg.style.display = 'none';
+    btn.textContent = 'Carregando...';
+    btn.disabled = true;
+    
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: emailInput.value,
+            password: passwordInput.value,
+        });
+
+        if (error) {
+            errorMsg.textContent = 'Erro ao fazer login: ' + error.message;
+            errorMsg.style.display = 'block';
+        } else {
+            showDashboard();
+        }
+    } catch (e) {
+        errorMsg.textContent = 'Erro fatal no sistema: ' + e.message;
+        errorMsg.style.display = 'block';
+    }
+    
+    btn.textContent = 'Entrar';
+    btn.disabled = false;
+};
 
 // Fazer Logout
 logoutBtn.addEventListener('click', async () => {

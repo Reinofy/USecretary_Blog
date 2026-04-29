@@ -26,7 +26,7 @@
                 <i class="ph ph-waveform"></i> U-Secretary <span class="brand-highlight">ADMIN</span>
             </div>
             <h2>Acesso Restrito</h2>
-            <form id="login-form" onsubmit="event.preventDefault();">
+            <form id="login-form">
                 <div class="form-group">
                     <label>E-mail</label>
                     <input type="email" id="login-email" required placeholder="admin@usecretary.com.br">
@@ -35,7 +35,7 @@
                     <label>Senha</label>
                     <input type="password" id="login-password" required placeholder="••••••••">
                 </div>
-                <button type="submit" class="btn-primary" style="width: 100%;">Entrar</button>
+                <button type="button" class="btn-primary" style="width: 100%;" onclick="fazerLogin()">Entrar</button>
             </form>
             <p id="login-error" class="error-msg" style="display: none;">Email ou senha incorretos.</p>
         </div>
@@ -102,6 +102,6 @@
         </div>
     </div>
 
-    <script src="/admin/admin.js?v=2"></script>
+    <script src="/admin/admin.js?v=3"></script>
 </body>
 </html>
