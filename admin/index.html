@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle - Blog U-Secretary</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="../index.css">
+    <link rel="stylesheet" href="admin.css">
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="dark-theme">
+
+    <div id="login-screen" class="admin-container">
+        <div class="glass-panel login-panel">
+            <div class="brand-logo" style="justify-content: center; margin-bottom: 2rem;">
+                <i class="ph ph-waveform"></i> U-Secretary <span class="brand-highlight">ADMIN</span>
+            </div>
+            <h2>Acesso Restrito</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="login-email" required placeholder="admin@usecretary.com.br">
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">Entrar</button>
+            </form>
+            <p id="login-error" class="error-msg" style="display: none;">Email ou senha incorretos.</p>
+        </div>
+    </div>
+
+    <div id="dashboard-screen" class="admin-container" style="display: none;">
+        <nav class="admin-nav">
+            <div class="brand-logo">
+                <i class="ph ph-waveform"></i> U-Secretary <span class="brand-highlight">ADMIN</span>
+            </div>
+            <button id="logout-btn" class="btn-secondary btn-sm">Sair</button>
+        </nav>
+
+        <div class="admin-layout">
+            <aside class="admin-sidebar glass-panel">
+                <ul>
+                    <li class="active"><i class="ph ph-pencil-simple"></i> Novo Artigo</li>
+                    <li><i class="ph ph-files"></i> Meus Artigos (em breve)</li>
+                </ul>
+            </aside>
+
+            <main class="admin-main glass-panel">
+                <h2 style="margin-bottom: 1.5rem;">Escrever Novo Artigo</h2>
+                
+                <form id="post-form">
+                    <div class="form-group">
+                        <label>Título do Artigo</label>
+                        <input type="text" id="post-title" required placeholder="Ex: Como organizar sua rotina...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Resumo (Pequeno texto que aparece no card do blog)</label>
+                        <textarea id="post-excerpt" rows="2" required placeholder="Ex: Aprenda 5 dicas fundamentais para..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Categoria</label>
+                            <select id="post-category" required>
+                                <option value="Organização">Organização</option>
+                                <option value="Produtividade">Produtividade</option>
+                                <option value="Secretaria">Secretaria</option>
+                                <option value="Tecnologia">Tecnologia</option>
+                                <option value="Dicas">Dicas</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 2;">
+                            <label>URL da Imagem de Capa</label>
+                            <input type="url" id="post-image" required placeholder="https://exemplo.com/imagem.jpg">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Conteúdo Completo</label>
+                        <textarea id="post-content" rows="12" required placeholder="Escreva seu artigo aqui..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="publish-btn">
+                        <i class="ph ph-paper-plane-tilt"></i> Publicar Artigo
+                    </button>
+                    <p id="publish-status" style="margin-top: 1rem;"></p>
+                </form>
+            </main>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

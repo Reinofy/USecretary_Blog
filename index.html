@@ -16,6 +16,9 @@
     
     <!-- Phosphor Icons for modern icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="dark-theme">
     
@@ -93,54 +96,9 @@
             <a href="#" class="view-all">Ver todos <i class="ph ph-caret-right"></i></a>
         </div>
         
-        <div class="posts-grid">
-            <!-- Post 1 -->
-            <article class="post-card">
-                <div class="post-img-wrapper">
-                    <img src="https://images.unsplash.com/photo-1512314889357-e157c22f938d?auto=format&fit=crop&q=80&w=600&h=400" alt="Gestão do tempo">
-                    <div class="category-badge">Secretaria</div>
-                </div>
-                <div class="post-card-content">
-                    <div class="post-meta">
-                        <span class="date">25 Abr 2026</span>
-                    </div>
-                    <h3 class="post-title">O papel da tecnologia nos serviços modernos de secretaria</h3>
-                    <p class="post-excerpt">Como ferramentas de inteligência artificial estão transformando rotinas burocráticas e liberando tempo para tarefas estratégicas.</p>
-                    <a href="#" class="card-read-more">Ler artigo <i class="ph ph-arrow-right"></i></a>
-                </div>
-            </article>
-            
-            <!-- Post 2 -->
-            <article class="post-card">
-                <div class="post-img-wrapper">
-                    <img src="https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&q=80&w=600&h=400" alt="Reunião online">
-                    <div class="category-badge">Tecnologia</div>
-                </div>
-                <div class="post-card-content">
-                    <div class="post-meta">
-                        <span class="date">20 Abr 2026</span>
-                    </div>
-                    <h3 class="post-title">Da fala ao texto: A revolução das transcrições automáticas</h3>
-                    <p class="post-excerpt">Entenda por que advogados, médicos e executivos estão migrando para soluções automatizadas de registro de reuniões e consultas.</p>
-                    <a href="#" class="card-read-more">Ler artigo <i class="ph ph-arrow-right"></i></a>
-                </div>
-            </article>
-            
-            <!-- Post 3 -->
-            <article class="post-card">
-                <div class="post-img-wrapper">
-                    <img src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?auto=format&fit=crop&q=80&w=600&h=400" alt="Checklist">
-                    <div class="category-badge">Dicas</div>
-                </div>
-                <div class="post-card-content">
-                    <div class="post-meta">
-                        <span class="date">15 Abr 2026</span>
-                    </div>
-                    <h3 class="post-title">Checklist semanal: O segredo para uma agenda infalível</h3>
-                    <p class="post-excerpt">Aprenda a realizar o planejamento semanal perfeito e reduza a ansiedade de esquecer compromissos importantes.</p>
-                    <a href="#" class="card-read-more">Ler artigo <i class="ph ph-arrow-right"></i></a>
-                </div>
-            </article>
+        <div class="posts-grid" id="dynamic-posts-grid">
+            <!-- Os artigos serão carregados dinamicamente do Supabase aqui -->
+            <p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center; padding: 2rem;">Carregando artigos...</p>
         </div>
     </section>
 

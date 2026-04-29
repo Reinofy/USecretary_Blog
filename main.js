@@ -75,3 +75,67 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// --- Integração com Supabase ---
+const SUPABASE_URL = 'https://croheciuxhtifejhcwws.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNyb2hlY2l1eGh0aWZlamhjd3dzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NDYxNTgsImV4cCI6MjA4NjEyMjE1OH0.Fqt9ushsPnS6iQX7oGjeFtKfxyIK5iyVEBY5HCa5d1c';
+
+// Inicializa o cliente apenas se o script do Supabase tiver sido carregado
+if (window.supabase) {
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function loadPosts() {
+        const postsContainer = document.getElementById('dynamic-posts-grid');
+        if (!postsContainer) return;
+
+        const { data: posts, error } = await supabase
+            .from('blog_posts')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Erro ao buscar posts:', error);
+            postsContainer.innerHTML = '<p style="color: #ef4444; grid-column: 1 / -1; text-align: center;">Erro ao carregar os artigos.</p>';
+            return;
+        }
+
+        if (posts.length === 0) {
+            postsContainer.innerHTML = '<p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center; padding: 2rem;">Nenhum artigo publicado ainda. Em breve teremos novidades!</p>';
+            return;
+        }
+
+        postsContainer.innerHTML = ''; // Limpa o container
+
+        posts.forEach(post => {
+            // Formata a data
+            const dateObj = new Date(post.created_at);
+            const formattedDate = dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+
+            const article = document.createElement('article');
+            article.className = 'post-card';
+            
+            // Usar imagem padrão se não houver
+            const imgUrl = post.image_url || 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&q=80&w=600&h=400';
+            const category = post.category || 'Novidade';
+
+            article.innerHTML = `
+                <div class="post-img-wrapper">
+                    <img src="${imgUrl}" alt="${post.title}">
+                    <div class="category-badge">${category}</div>
+                </div>
+                <div class="post-card-content">
+                    <div class="post-meta">
+                        <span class="date">${formattedDate}</span>
+                    </div>
+                    <h3 class="post-title">${post.title}</h3>
+                    <p class="post-excerpt">${post.excerpt || ''}</p>
+                    <a href="#" class="card-read-more">Ler artigo <i class="ph ph-arrow-right"></i></a>
+                </div>
+            `;
+            postsContainer.appendChild(article);
+        });
+    }
+
+    // Carrega os posts quando a página carregar
+    loadPosts();
+}
