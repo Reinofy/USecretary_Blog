@@ -44,50 +44,54 @@ async function checkSession() {
 
 // Fazer Login
 window.fazerLogin = async function() {
-    const emailInput = document.getElementById('login-email');
-    const passwordInput = document.getElementById('login-password');
-    const errorMsg = document.getElementById('login-error');
-    const btn = document.querySelector('#login-form button');
-    
-    if (!supabase) {
-        alert("O banco de dados não está conectado. O login não funcionará.");
-        return;
-    }
-    
-    // Validação básica
-    if (!emailInput.value || !passwordInput.value) {
-        errorMsg.textContent = 'Por favor, preencha o e-mail e a senha.';
-        errorMsg.style.display = 'block';
-        return;
-    }
-
-    errorMsg.style.display = 'none';
-    btn.textContent = 'Carregando...';
-    btn.disabled = true;
-    
     try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: emailInput.value,
-            password: passwordInput.value,
-        });
-
-        if (error) {
-            let msg = error.message;
-            if (msg === 'Invalid login credentials') {
-                msg = 'E-mail ou senha incorretos.';
-            }
-            errorMsg.textContent = msg;
-            errorMsg.style.display = 'block';
-        } else {
-            showDashboard();
+        const emailInput = document.getElementById('login-email');
+        const passwordInput = document.getElementById('login-password');
+        const errorMsg = document.getElementById('login-error');
+        const btn = document.querySelector('#login-form button');
+        
+        if (!supabase) {
+            alert("ERRO: O banco de dados (Supabase) não está conectado. Tente recarregar a página.");
+            return;
         }
+        
+        // Validação básica
+        if (!emailInput.value || !passwordInput.value) {
+            errorMsg.textContent = 'Por favor, preencha o e-mail e a senha.';
+            errorMsg.style.display = 'block';
+            return;
+        }
+
+        errorMsg.style.display = 'none';
+        btn.textContent = 'Carregando...';
+        btn.disabled = true;
+        
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: emailInput.value,
+                password: passwordInput.value,
+            });
+
+            if (error) {
+                let msg = error.message;
+                if (msg === 'Invalid login credentials') {
+                    msg = 'E-mail ou senha incorretos.';
+                }
+                errorMsg.textContent = msg;
+                errorMsg.style.display = 'block';
+            } else {
+                showDashboard();
+            }
+        } catch (authError) {
+            errorMsg.textContent = 'Erro de conexão: ' + authError.message;
+            errorMsg.style.display = 'block';
+        }
+        
+        btn.textContent = 'Entrar';
+        btn.disabled = false;
     } catch (e) {
-        errorMsg.textContent = 'Erro fatal no sistema: ' + e.message;
-        errorMsg.style.display = 'block';
+        alert("Erro interno na tela de login: " + e.message);
     }
-    
-    btn.textContent = 'Entrar';
-    btn.disabled = false;
 };
 
 if (logoutBtn) {
