@@ -1,4 +1,5 @@
 // Tratar qualquer erro global
+alert("Script admin.js foi carregado com sucesso!");
 window.onerror = function(msg, url, line) {
     alert("ERRO NO CÓDIGO:\n" + msg + "\nLinha: " + line);
 };
