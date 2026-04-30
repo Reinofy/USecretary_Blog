@@ -43,7 +43,8 @@ async function checkSession() {
 }
 
 // Fazer Login
-window.fazerLogin = async function() {
+window.fazerLogin = async function(e) {
+    if (e) e.preventDefault();
     try {
         const emailInput = document.getElementById('login-email');
         const passwordInput = document.getElementById('login-password');
