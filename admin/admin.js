@@ -72,7 +72,11 @@ window.fazerLogin = async function() {
         });
 
         if (error) {
-            errorMsg.textContent = 'Erro ao fazer login: ' + error.message;
+            let msg = error.message;
+            if (msg === 'Invalid login credentials') {
+                msg = 'E-mail ou senha incorretos.';
+            }
+            errorMsg.textContent = msg;
             errorMsg.style.display = 'block';
         } else {
             showDashboard();
