@@ -119,17 +119,17 @@ if (window.supabase) {
             const category = post.category || 'Novidade';
 
             article.innerHTML = `
-                <div class="post-img-wrapper">
+                <a href="artigo.html?id=${post.id}" class="post-img-wrapper" style="display: block; text-decoration: none;">
                     <img src="${imgUrl}" alt="${post.title}">
                     <div class="category-badge">${category}</div>
-                </div>
+                </a>
                 <div class="post-card-content">
                     <div class="post-meta">
                         <span class="date">${formattedDate}</span>
                     </div>
-                    <h3 class="post-title">${post.title}</h3>
+                    <h3 class="post-title"><a href="artigo.html?id=${post.id}" style="color: inherit; text-decoration: none;">${post.title}</a></h3>
                     <p class="post-excerpt">${post.excerpt || ''}</p>
-                    <a href="#" class="card-read-more">Ler artigo <i class="ph ph-arrow-right"></i></a>
+                    <a href="artigo.html?id=${post.id}" class="card-read-more">Ler artigo <i class="ph ph-arrow-right"></i></a>
                 </div>
             `;
             postsContainer.appendChild(article);
