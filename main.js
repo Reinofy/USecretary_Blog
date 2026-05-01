@@ -91,7 +91,9 @@ if (window.supabase) {
         const { data: posts, error } = await supabase
             .from('blog_posts')
             .select('*')
-            .order('created_at', { ascending: false });
+            .eq('status', 'published')
+            .lte('published_at', new Date().toISOString())
+            .order('published_at', { ascending: false });
 
         if (error) {
             console.error('Erro ao buscar posts:', error);

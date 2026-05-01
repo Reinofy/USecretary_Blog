@@ -55,16 +55,21 @@
         <div class="admin-layout">
             <aside class="admin-sidebar glass-panel">
                 <ul>
-                    <li class="active"><i class="ph ph-pencil-simple"></i> Novo Artigo</li>
-                    <li><i class="ph ph-files"></i> Meus Artigos (em breve)</li>
+                    <li id="menu-write" class="active"><i class="ph ph-pencil-simple"></i> Escrever Artigo</li>
+                    <li id="menu-list"><i class="ph ph-files"></i> Meus Artigos</li>
                 </ul>
             </aside>
 
             <main class="admin-main glass-panel">
-                <h2 style="margin-bottom: 1.5rem;">Escrever Novo Artigo</h2>
-                
-                <form id="post-form" onsubmit="event.preventDefault();">
-                    <div class="form-group">
+                <!-- SEÇÃO ESCREVER -->
+                <section id="section-write">
+                    <h2 id="form-title" style="margin-bottom: 1.5rem;">Escrever Novo Artigo</h2>
+                    
+                    <form id="post-form" onsubmit="event.preventDefault();">
+                        <input type="hidden" id="post-id" value="">
+                        <input type="hidden" id="post-action" value="published">
+                        
+                        <div class="form-group">
                         <label>Título do Artigo</label>
                         <input type="text" id="post-title" required placeholder="Ex: Como organizar sua rotina...">
                     </div>
@@ -87,7 +92,7 @@
                         </div>
                         <div class="form-group" style="flex: 2;">
                             <label>Imagem de Capa (Upload)</label>
-                            <input type="file" id="post-image" accept="image/*" required>
+                            <input type="file" id="post-image" accept="image/*">
                         </div>
                     </div>
 
@@ -98,15 +103,35 @@
                     </div>
 
                     <div class="form-group">
+                        <label>Agendar Publicação (Opcional)</label>
+                        <input type="datetime-local" id="post-date">
+                        <small style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 0.2rem;">Deixe em branco para publicar imediatamente. Se colocar data futura, ficará invisível no blog até a data.</small>
+                    </div>
+
+                    <div class="form-group">
                         <label>Conteúdo Completo</label>
                         <div id="editor-container" style="height: 300px; background: rgba(0, 0, 0, 0.2); border-radius: 0 0 8px 8px;"></div>
                     </div>
 
-                    <button type="submit" class="btn-primary" id="publish-btn">
-                        <i class="ph ph-paper-plane-tilt"></i> Publicar Artigo
-                    </button>
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn-primary" id="publish-btn" onclick="document.getElementById('post-action').value='published'">
+                            <i class="ph ph-paper-plane-tilt"></i> Publicar Artigo
+                        </button>
+                        <button type="submit" class="btn-secondary" id="draft-btn" onclick="document.getElementById('post-action').value='draft'" style="border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: white; border-radius: var(--radius-sm); padding: 0.8rem 1.5rem; cursor: pointer;">
+                            <i class="ph ph-floppy-disk"></i> Salvar Rascunho
+                        </button>
+                    </div>
                     <p id="publish-status" style="margin-top: 1rem;"></p>
                 </form>
+                </section>
+
+                <!-- SEÇÃO LISTA DE ARTIGOS -->
+                <section id="section-list" style="display: none;">
+                    <h2 style="margin-bottom: 1.5rem;">Meus Artigos</h2>
+                    <div id="articles-list-container">
+                        <p style="color: var(--text-muted);">Carregando artigos...</p>
+                    </div>
+                </section>
             </main>
         </div>
     </div>

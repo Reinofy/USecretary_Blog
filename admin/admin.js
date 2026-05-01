@@ -28,6 +28,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const postForm = document.getElementById('post-form');
     const publishStatus = document.getElementById('publish-status');
+    
+    const menuWrite = document.getElementById('menu-write');
+    const menuList = document.getElementById('menu-list');
+    const sectionWrite = document.getElementById('section-write');
+    const sectionList = document.getElementById('section-list');
+
+    // Navegação entre abas
+    if (menuWrite && menuList) {
+        menuWrite.addEventListener('click', () => {
+            sectionWrite.style.display = 'block';
+            sectionList.style.display = 'none';
+            menuWrite.classList.add('active');
+            menuList.classList.remove('active');
+            
+            // Resetar form se estava editando
+            if (document.getElementById('post-id').value !== '') {
+                resetForm();
+            }
+        });
+        menuList.addEventListener('click', () => {
+            sectionWrite.style.display = 'none';
+            sectionList.style.display = 'block';
+            menuList.classList.add('active');
+            menuWrite.classList.remove('active');
+            window.loadMyArticles();
+        });
+    }
 
     // Verifica se o usuário já está logado ao carregar a página
     async function checkSession() {
@@ -47,19 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fazer Login
     if (loginForm) {
         loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault(); // Impede o recarregamento da página ABSOLUTAMENTE
+            e.preventDefault();
             try {
                 const emailInput = document.getElementById('login-email');
                 const passwordInput = document.getElementById('login-password');
                 const errorMsg = document.getElementById('login-error');
                 const btn = loginForm.querySelector('button');
                 
-                if (!supabase) {
-                    alert("ERRO: O banco de dados (Supabase) não está conectado. Tente recarregar a página.");
-                    return;
-                }
+                if (!supabase) return;
                 
-                // Validação básica
                 if (!emailInput.value || !passwordInput.value) {
                     errorMsg.textContent = 'Por favor, preencha o e-mail e a senha.';
                     errorMsg.style.display = 'block';
@@ -78,9 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (error) {
                         let msg = error.message;
-                        if (msg === 'Invalid login credentials') {
-                            msg = 'E-mail ou senha incorretos.';
-                        }
+                        if (msg === 'Invalid login credentials') msg = 'E-mail ou senha incorretos.';
                         errorMsg.textContent = msg;
                         errorMsg.style.display = 'block';
                     } else {
@@ -111,23 +132,39 @@ document.addEventListener('DOMContentLoaded', () => {
         postForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const postId = document.getElementById('post-id').value;
+            const postAction = document.getElementById('post-action').value; // 'published' ou 'draft'
+            const postDate = document.getElementById('post-date').value;
+            
             const title = document.getElementById('post-title').value;
             const excerpt = document.getElementById('post-excerpt').value;
             const category = document.getElementById('post-category').value;
             const imageInput = document.getElementById('post-image');
             const content = quillEditor ? quillEditor.root.innerHTML : '';
             const seoTags = document.getElementById('post-tags').value;
-            const btn = document.getElementById('publish-btn');
             
-            btn.disabled = true;
-            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Publicando...';
-            publishStatus.textContent = '';
+            const btnPublish = document.getElementById('publish-btn');
+            const btnDraft = document.getElementById('draft-btn');
+            
+            btnPublish.disabled = true;
+            btnDraft.disabled = true;
+            
+            publishStatus.textContent = 'Processando...';
             publishStatus.className = '';
 
             const { data, error } = await supabase.auth.getUser();
             if (!data.user) {
                 alert("Sua sessão expirou. Faça login novamente.");
                 showLogin();
+                return;
+            }
+
+            // Exigir imagem se for novo post
+            if (!postId && (!imageInput.files || imageInput.files.length === 0)) {
+                publishStatus.textContent = 'A imagem de capa é obrigatória para um novo artigo.';
+                publishStatus.className = 'error-msg';
+                btnPublish.disabled = false;
+                btnDraft.disabled = false;
                 return;
             }
 
@@ -146,10 +183,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     .upload(filePath, imageFile);
                     
                 if (uploadError) {
-                    publishStatus.textContent = 'Erro no upload da imagem. O bucket "blog-images" existe e é público? Erro: ' + uploadError.message;
+                    publishStatus.textContent = 'Erro no upload da imagem. ' + uploadError.message;
                     publishStatus.className = 'error-msg';
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Publicar Artigo';
+                    btnPublish.disabled = false;
+                    btnDraft.disabled = false;
                     return;
                 }
                 
@@ -160,34 +197,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 finalImageUrl = urlData.publicUrl;
             }
 
-            publishStatus.textContent = 'Salvando artigo...';
+            publishStatus.textContent = 'Salvando dados...';
 
-            const { error: insertError } = await supabase
-                .from('blog_posts')
-                .insert([
-                    { 
-                        title: title, 
-                        excerpt: excerpt, 
-                        category: category, 
-                        image_url: finalImageUrl, 
-                        content: content,
-                        seo_tags: seoTags
-                    }
-                ]);
+            const postData = {
+                title: title, 
+                excerpt: excerpt, 
+                category: category, 
+                content: content,
+                seo_tags: seoTags,
+                status: postAction
+            };
 
-            if (insertError) {
-                publishStatus.textContent = 'Erro ao publicar: ' + insertError.message;
+            // Regras de Agendamento
+            if (postDate) {
+                postData.published_at = new Date(postDate).toISOString();
+            } else if (!postId) {
+                // Se for novo e não tiver data, publica agora
+                postData.published_at = new Date().toISOString();
+            }
+
+            if (finalImageUrl) {
+                postData.image_url = finalImageUrl;
+            }
+
+            let opError;
+            if (postId) {
+                // Atualizar
+                const { error: updateError } = await supabase.from('blog_posts').update(postData).eq('id', postId);
+                opError = updateError;
+            } else {
+                // Inserir
+                const { error: insertError } = await supabase.from('blog_posts').insert([postData]);
+                opError = insertError;
+            }
+
+            if (opError) {
+                publishStatus.textContent = 'Erro ao salvar: ' + opError.message;
                 publishStatus.className = 'error-msg';
             } else {
-                publishStatus.textContent = 'Artigo publicado com sucesso! 🎉';
+                publishStatus.textContent = postAction === 'draft' ? 'Rascunho salvo com sucesso!' : 'Artigo publicado com sucesso! 🎉';
                 publishStatus.className = 'success-msg';
-                postForm.reset();
-                if (quillEditor) quillEditor.setText('');
+                resetForm();
+                
+                // Se estava editando, volta para a lista
+                if (postId) {
+                    setTimeout(() => menuList.click(), 1500);
+                }
             }
             
-            btn.disabled = false;
-            btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Publicar Artigo';
+            btnPublish.disabled = false;
+            btnDraft.disabled = false;
         });
+    }
+
+    function resetForm() {
+        postForm.reset();
+        document.getElementById('post-id').value = '';
+        document.getElementById('post-action').value = 'published';
+        document.getElementById('form-title').textContent = 'Escrever Novo Artigo';
+        document.getElementById('publish-btn').innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Publicar Artigo';
+        if (quillEditor) quillEditor.setText('');
     }
 
     function showLogin() {
@@ -207,9 +276,10 @@ document.addEventListener('DOMContentLoaded', () => {
             theme: 'snow',
             modules: {
                 toolbar: [
-                    ['bold', 'italic', 'underline'],
+                    ['bold', 'italic', 'underline', 'strike'],
                     [{ 'align': [] }],
                     ['link'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
                     [{ 'font': [] }],
                     [{ 'size': ['small', false, 'large', 'huge'] }],
                     ['clean']
@@ -218,6 +288,103 @@ document.addEventListener('DOMContentLoaded', () => {
             placeholder: 'Escreva seu artigo aqui...'
         });
     }
+
+    // --- FUNÇÕES DE GERENCIAMENTO DE ARTIGOS ---
+    window.loadMyArticles = async function() {
+        if (!supabase) return;
+        const container = document.getElementById('articles-list-container');
+        container.innerHTML = '<p style="color: var(--text-muted);"><i class="ph ph-spinner ph-spin"></i> Buscando artigos...</p>';
+        
+        const { data: posts, error } = await supabase.from('blog_posts').select('*').order('created_at', { ascending: false });
+        
+        if (error) { 
+            container.innerHTML = '<p style="color: #ef4444;">Erro ao carregar os artigos: ' + error.message + '</p>'; 
+            return; 
+        }
+        if (!posts || posts.length === 0) { 
+            container.innerHTML = '<p style="color: var(--text-muted);">Nenhum artigo encontrado. Crie o seu primeiro!</p>'; 
+            return; 
+        }
+        
+        let html = '<div style="overflow-x: auto;"><table class="admin-table">';
+        html += '<thead><tr><th>Título</th><th>Data / Agendamento</th><th>Status</th><th>Ações</th></tr></thead><tbody>';
+        
+        posts.forEach(p => {
+            const isDraft = p.status === 'draft';
+            const statusBadge = isDraft 
+                ? '<span class="badge badge-draft">Rascunho</span>' 
+                : '<span class="badge badge-published">Publicado</span>';
+            
+            let dateText = '-';
+            if (p.published_at) {
+                const dateObj = new Date(p.published_at);
+                dateText = dateObj.toLocaleDateString('pt-BR') + ' ' + dateObj.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+                if (!isDraft && dateObj > new Date()) {
+                    dateText = `<span style="color: #3b82f6;">Agendado para:<br>${dateText}</span>`;
+                }
+            }
+
+            html += `<tr>
+                <td style="font-weight: 500;">${p.title}</td>
+                <td style="color: var(--text-muted); font-size: 0.9rem;">${dateText}</td>
+                <td>${statusBadge}</td>
+                <td>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button onclick="editPost('${p.id}')" class="btn-action btn-edit"><i class="ph ph-pencil-simple"></i></button>
+                        <button onclick="deletePost('${p.id}')" class="btn-action btn-delete"><i class="ph ph-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        });
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+    };
+    
+    window.editPost = async function(id) {
+        publishStatus.textContent = '';
+        publishStatus.className = '';
+        const { data: post, error } = await supabase.from('blog_posts').select('*').eq('id', id).single();
+        
+        if (error || !post) { 
+            alert('Erro ao buscar post'); 
+            return; 
+        }
+        
+        document.getElementById('post-id').value = post.id;
+        document.getElementById('post-title').value = post.title;
+        document.getElementById('post-excerpt').value = post.excerpt || '';
+        document.getElementById('post-category').value = post.category;
+        document.getElementById('post-tags').value = post.seo_tags || '';
+        if (quillEditor) {
+            // Pequeno delay para garantir que o Quill renderize
+            setTimeout(() => quillEditor.root.innerHTML = post.content || '', 50);
+        }
+        
+        if (post.published_at) {
+            // Formatar data para input datetime-local (YYYY-MM-DDThh:mm)
+            const d = new Date(post.published_at);
+            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+            document.getElementById('post-date').value = d.toISOString().slice(0, 16);
+        } else {
+            document.getElementById('post-date').value = '';
+        }
+        
+        // Trocar aba
+        menuWrite.click();
+        document.getElementById('form-title').textContent = 'Editar Artigo: ' + post.title;
+        document.getElementById('publish-btn').innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Atualizar Artigo';
+    };
+    
+    window.deletePost = async function(id) {
+        if (confirm('Atenção: Tem certeza que deseja excluir este artigo permanentemente? Essa ação não pode ser desfeita.')) {
+            const { error } = await supabase.from('blog_posts').delete().eq('id', id);
+            if (error) {
+                alert('Erro ao excluir: ' + error.message);
+            } else {
+                window.loadMyArticles();
+            }
+        }
+    };
 
     // Iniciar verificação
     checkSession();
