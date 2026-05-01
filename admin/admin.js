@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const category = document.getElementById('post-category').value;
             const imageInput = document.getElementById('post-image');
             const content = quillEditor ? quillEditor.root.innerHTML : '';
+            const seoTags = document.getElementById('post-tags').value;
             const btn = document.getElementById('publish-btn');
             
             btn.disabled = true;
@@ -169,7 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         excerpt: excerpt, 
                         category: category, 
                         image_url: finalImageUrl, 
-                        content: content 
+                        content: content,
+                        seo_tags: seoTags
                     }
                 ]);
 
