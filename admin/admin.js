@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const excerpt = document.getElementById('post-excerpt').value;
             const category = document.getElementById('post-category').value;
             const imageInput = document.getElementById('post-image');
-            const content = document.getElementById('post-content').value;
+            const content = quillEditor ? quillEditor.root.innerHTML : '';
             const btn = document.getElementById('publish-btn');
             
             btn.disabled = true;
@@ -180,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 publishStatus.textContent = 'Artigo publicado com sucesso! 🎉';
                 publishStatus.className = 'success-msg';
                 postForm.reset();
+                if (quillEditor) quillEditor.setText('');
             }
             
             btn.disabled = false;
@@ -195,6 +196,25 @@ document.addEventListener('DOMContentLoaded', () => {
     function showDashboard() {
         if(loginScreen) loginScreen.style.display = 'none';
         if(dashboardScreen) dashboardScreen.style.display = 'block';
+    }
+
+    // Inicializar o editor Quill
+    let quillEditor = null;
+    if (document.getElementById('editor-container')) {
+        quillEditor = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'align': [] }],
+                    ['link'],
+                    [{ 'font': [] }],
+                    [{ 'size': ['small', false, 'large', 'huge'] }],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Escreva seu artigo aqui...'
+        });
     }
 
     // Iniciar verificação

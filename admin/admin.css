@@ -104,3 +104,33 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Quill Dark Theme Overrides */
+.ql-toolbar.ql-snow {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px 8px 0 0;
+}
+.ql-container.ql-snow {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: none;
+    font-family: inherit;
+    font-size: 1rem;
+    color: white;
+}
+.ql-snow .ql-stroke {
+    stroke: #ccc;
+}
+.ql-snow .ql-fill, .ql-snow .ql-stroke.ql-fill {
+    fill: #ccc;
+}
+.ql-snow .ql-picker {
+    color: #ccc;
+}
+.ql-snow .ql-picker-options {
+    background-color: #1a1d24;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+.ql-editor {
+    min-height: 250px;
+}
