@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const title = document.getElementById('post-title').value;
             const excerpt = document.getElementById('post-excerpt').value;
             const category = document.getElementById('post-category').value;
-            const imageUrl = document.getElementById('post-image').value;
+            const imageInput = document.getElementById('post-image');
             const content = document.getElementById('post-content').value;
             const btn = document.getElementById('publish-btn');
             
@@ -130,6 +130,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            let finalImageUrl = '';
+            const imageFile = imageInput.files[0];
+            
+            if (imageFile) {
+                publishStatus.textContent = 'Fazendo upload da imagem...';
+                
+                const fileExt = imageFile.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+                const filePath = `covers/${fileName}`;
+                
+                const { error: uploadError } = await supabase.storage
+                    .from('blog-images')
+                    .upload(filePath, imageFile);
+                    
+                if (uploadError) {
+                    publishStatus.textContent = 'Erro no upload da imagem. O bucket "blog-images" existe e é público? Erro: ' + uploadError.message;
+                    publishStatus.className = 'error-msg';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Publicar Artigo';
+                    return;
+                }
+                
+                const { data: urlData } = supabase.storage
+                    .from('blog-images')
+                    .getPublicUrl(filePath);
+                    
+                finalImageUrl = urlData.publicUrl;
+            }
+
+            publishStatus.textContent = 'Salvando artigo...';
+
             const { error: insertError } = await supabase
                 .from('blog_posts')
                 .insert([
@@ -137,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         title: title, 
                         excerpt: excerpt, 
                         category: category, 
-                        image_url: imageUrl, 
+                        image_url: finalImageUrl, 
                         content: content 
                     }
                 ]);
