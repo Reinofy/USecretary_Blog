@@ -91,10 +91,131 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.head.appendChild(metaKeywords);
             }
 
+            // --- Lógica de Compartilhamento ---
+            setupSharing(post);
+            
+            // --- Lógica de Comentários (Mock Local para Demonstração) ---
+            setupComments(articleId);
+
         } catch (err) {
             console.error('Erro inesperado:', err);
             showError();
         }
+    }
+
+    function setupSharing(post) {
+        const url = encodeURIComponent(window.location.href);
+        const title = encodeURIComponent(post.title);
+        
+        document.getElementById('share-facebook').addEventListener('click', () => {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
+        });
+        
+        document.getElementById('share-linkedin').addEventListener('click', () => {
+            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=600,height=400');
+        });
+        
+        document.getElementById('share-instagram').addEventListener('click', () => {
+            // O Instagram não possui API direta de compartilhamento web por link.
+            // Copiamos o link para a área de transferência.
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                alert('Link do artigo copiado! Compartilhe com sua rede.');
+            }).catch(err => {
+                window.open('https://instagram.com', '_blank');
+            });
+        });
+    }
+
+    function setupComments(articleId) {
+        // Utilizando localStorage para simular a persistência de comentários.
+        // Em um ambiente de produção real com backend ativo, substituir por requisição ao Supabase.
+        const commentsKey = `blog_comments_${articleId}`;
+        let comments = JSON.parse(localStorage.getItem(commentsKey)) || [];
+        
+        const commentList = document.getElementById('comment-list');
+        const commentsCountBadge = document.getElementById('comments-count-badge');
+        const nameInput = document.getElementById('comment-name');
+        const textInput = document.getElementById('comment-text');
+        const submitBtn = document.getElementById('btn-submit-comment');
+        
+        function renderComments() {
+            commentsCountBadge.textContent = comments.length;
+            
+            if (comments.length === 0) {
+                commentList.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);" id="no-comments-msg">
+                        Seja o primeiro a comentar!
+                    </div>
+                `;
+                return;
+            }
+            
+            commentList.innerHTML = '';
+            comments.forEach(comment => {
+                const date = new Date(comment.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+                const initial = comment.name.charAt(0).toUpperCase();
+                
+                const commentHTML = `
+                    <div class="comment-item">
+                        <div class="comment-avatar">${initial}</div>
+                        <div class="comment-content">
+                            <div class="comment-author">${escapeHTML(comment.name)}</div>
+                            <div class="comment-date">${date}</div>
+                            <div class="comment-text">${escapeHTML(comment.text).replace(/\n/g, '<br>')}</div>
+                        </div>
+                    </div>
+                `;
+                commentList.insertAdjacentHTML('beforeend', commentHTML);
+            });
+        }
+        
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag] || tag));
+        }
+        
+        submitBtn.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            const text = textInput.value.trim();
+            
+            if (!name || !text) {
+                alert('Por favor, preencha seu nome e seu comentário.');
+                return;
+            }
+            
+            const newComment = {
+                name,
+                text,
+                date: new Date().toISOString()
+            };
+            
+            comments.push(newComment);
+            localStorage.setItem(commentsKey, JSON.stringify(comments));
+            
+            nameInput.value = '';
+            textInput.value = '';
+            
+            renderComments();
+            
+            // Feedback visual no botão
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Comentário Publicado!';
+            submitBtn.style.background = 'var(--secondary-color)';
+            submitBtn.style.color = '#fff';
+            
+            setTimeout(() => {
+                submitBtn.textContent = 'Publicar Comentário';
+                submitBtn.style.background = '';
+            }, 3000);
+        });
+        
+        // Render inicial
+        renderComments();
     }
 
     function showError() {

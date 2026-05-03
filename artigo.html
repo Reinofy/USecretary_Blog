@@ -73,6 +73,55 @@
                     <!-- Conteúdo será injetado aqui -->
                 </div>
             </div>
+            
+            <!-- Interaction Space (Sharing & Comments) -->
+            <div class="interaction-space">
+                <!-- Share Section -->
+                <div class="share-section">
+                    <div class="share-title">
+                        <i class="ph ph-share-network"></i>
+                        Compartilhe este artigo
+                    </div>
+                    <div class="share-buttons">
+                        <button class="btn-share facebook" id="share-facebook" aria-label="Compartilhar no Facebook">
+                            <i class="ph ph-facebook-logo"></i>
+                        </button>
+                        <button class="btn-share linkedin" id="share-linkedin" aria-label="Compartilhar no LinkedIn">
+                            <i class="ph ph-linkedin-logo"></i>
+                        </button>
+                        <button class="btn-share instagram" id="share-instagram" aria-label="Compartilhar no Instagram">
+                            <i class="ph ph-instagram-logo"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="comments-section" id="comments">
+                    <div class="comments-header">
+                        <h3 class="comments-title">Comentários</h3>
+                        <span class="comments-count" id="comments-count-badge">0</span>
+                    </div>
+
+                    <div class="comment-form">
+                        <div class="form-group">
+                            <input type="text" id="comment-name" class="form-input" placeholder="Seu nome" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="comment-text" class="form-textarea" placeholder="O que você achou deste artigo?" required></textarea>
+                        </div>
+                        <button id="btn-submit-comment" class="btn-primary" style="width: 100%;">
+                            Publicar Comentário
+                        </button>
+                    </div>
+
+                    <div class="comment-list" id="comment-list">
+                        <!-- Comentários serão carregados aqui -->
+                        <div style="text-align: center; padding: 2rem; color: var(--text-muted);" id="no-comments-msg">
+                            Seja o primeiro a comentar!
+                        </div>
+                    </div>
+                </div>
+            </div>
         </article>
         
         <div id="error-indicator" style="display: none; text-align: center; padding: 5rem 0;">
