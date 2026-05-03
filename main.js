@@ -102,40 +102,81 @@ if (window.supabase) {
         }
 
         if (posts.length === 0) {
+            document.getElementById('dynamic-featured-post').innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">Nenhum artigo publicado ainda.</p>';
             postsContainer.innerHTML = '<p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center; padding: 2rem;">Nenhum artigo publicado ainda. Em breve teremos novidades!</p>';
             return;
         }
 
         postsContainer.innerHTML = ''; // Limpa o container
 
-        posts.forEach(post => {
-            // Formata a data
-            const dateObj = new Date(post.created_at);
-            const formattedDate = dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+        // Renderiza o primeiro post como destaque
+        const featuredPost = posts[0];
+        const featuredDateObj = new Date(featuredPost.created_at);
+        const featuredDate = featuredDateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+        const featuredImgUrl = featuredPost.image_url || 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&q=80&w=800&h=500';
+        const featuredCategory = featuredPost.category || 'Novidade';
 
-            const article = document.createElement('article');
-            article.className = 'post-card';
-            
-            // Usar imagem padrão se não houver
-            const imgUrl = post.image_url || 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&q=80&w=600&h=400';
-            const category = post.category || 'Novidade';
-
-            article.innerHTML = `
-                <a href="artigo.html?id=${post.id}" class="post-img-wrapper" style="display: block; text-decoration: none;">
-                    <img src="${imgUrl}" alt="${post.title}">
-                    <div class="category-badge">${category}</div>
+        document.getElementById('dynamic-featured-post').innerHTML = `
+            <div class="featured-card glass-panel">
+                <a href="artigo.html?id=${featuredPost.id}" class="featured-image" style="display: block; text-decoration: none;">
+                    <img src="${featuredImgUrl}" alt="${featuredPost.title}">
+                    <div class="category-badge">${featuredCategory}</div>
                 </a>
-                <div class="post-card-content">
+                <div class="featured-content">
                     <div class="post-meta">
-                        <span class="date">${formattedDate}</span>
+                        <span class="date"><i class="ph ph-calendar-blank"></i> ${featuredDate}</span>
                     </div>
-                    <h3 class="post-title"><a href="artigo.html?id=${post.id}" style="color: inherit; text-decoration: none;">${post.title}</a></h3>
-                    <p class="post-excerpt">${post.excerpt || ''}</p>
-                    <a href="artigo.html?id=${post.id}" class="card-read-more">Ler artigo <i class="ph ph-arrow-right"></i></a>
+                    <h2 class="featured-title"><a href="artigo.html?id=${featuredPost.id}" style="color: inherit; text-decoration: none;">${featuredPost.title}</a></h2>
+                    <p class="featured-excerpt">${featuredPost.excerpt || ''}</p>
+                    
+                    <div class="author-info">
+                        <div class="author-avatar">${featuredPost.author_name ? featuredPost.author_name.charAt(0).toUpperCase() : 'US'}</div>
+                        <div>
+                            <p class="author-name">${featuredPost.author_name || 'Equipe U-Secretary'}</p>
+                            <p class="author-role">Especialista</p>
+                        </div>
+                    </div>
+                    
+                    <a href="artigo.html?id=${featuredPost.id}" class="read-more-btn">Ler artigo completo <i class="ph ph-arrow-right"></i></a>
                 </div>
-            `;
-            postsContainer.appendChild(article);
-        });
+            </div>
+        `;
+
+        // Renderiza os demais posts no grid
+        const remainingPosts = posts.slice(1);
+        
+        if (remainingPosts.length === 0) {
+            postsContainer.innerHTML = '<p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center; padding: 2rem;">Não há mais artigos no momento.</p>';
+        } else {
+            remainingPosts.forEach(post => {
+                // Formata a data
+                const dateObj = new Date(post.created_at);
+                const formattedDate = dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+
+                const article = document.createElement('article');
+                article.className = 'post-card';
+                
+                // Usar imagem padrão se não houver
+                const imgUrl = post.image_url || 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?auto=format&fit=crop&q=80&w=600&h=400';
+                const category = post.category || 'Novidade';
+
+                article.innerHTML = `
+                    <a href="artigo.html?id=${post.id}" class="post-img-wrapper" style="display: block; text-decoration: none;">
+                        <img src="${imgUrl}" alt="${post.title}">
+                        <div class="category-badge">${category}</div>
+                    </a>
+                    <div class="post-card-content">
+                        <div class="post-meta">
+                            <span class="date">${formattedDate}</span>
+                        </div>
+                        <h3 class="post-title"><a href="artigo.html?id=${post.id}" style="color: inherit; text-decoration: none;">${post.title}</a></h3>
+                        <p class="post-excerpt">${post.excerpt || ''}</p>
+                        <a href="artigo.html?id=${post.id}" class="card-read-more">Ler artigo <i class="ph ph-arrow-right"></i></a>
+                    </div>
+                `;
+                postsContainer.appendChild(article);
+            });
+        }
     }
 
     // Carrega os posts quando a página carregar
